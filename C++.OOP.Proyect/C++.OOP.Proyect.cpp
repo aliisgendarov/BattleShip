@@ -46,7 +46,9 @@ int main()
 				Player p2;
 
 				int cho = 0;
-				while (true)
+				bool isRunning = true;
+				
+				while (isRunning)
 				{
 					system("cls || clear");
 					cout << "Select players:" << endl;
@@ -70,6 +72,9 @@ int main()
 						if (cho == 0) p1.changeForLeft();
 						else if (cho == 1) p2.changeForLeft();
 						break;
+					case ESC:
+						isRunning = false;
+						break;
 					}
 				}
 				break;
@@ -78,35 +83,18 @@ int main()
 				system("cls || clear");
 				cout << "========== ABOUT GAME ==========" << endl << endl;
 
-				cout << "BattleShip is a strategic naval war game played on a grid map between two players." << endl;
-				cout << "The main goal of the game is to find and destroy all enemy ships before your opponent destroys yours." << endl << endl;
+				cout << "BattleShip is a strategic naval battle game played between two players." << endl;
+				cout << "The objective is to destroy all enemy ships before your opponent destroys yours.\n\n";
 
-				cout << "Game Features:\n";
-				cout << "- Menu controlled with arrow keys\n- Start Game and Exit options\n- Different player modes\n";
-				cout << "- Smart bot system\n- Manual and automatic ship placement\n- Colored hit and miss effects\n";
-				cout << "- Real-time ship status information\n\n";
+				cout << "Features:\n- Manual and automatic ship placement\n- Player vs Player and Bot modes\n";
+				cout << "- Smart bot AI system\n- Colored hit and miss effects\n- Real-time ship status information\n\n";
 
-				cout << "Game Modes:\n\n";
-				cout << "1. Manual\n   - Player places ships manually\n   - Player attacks manually\n\n";
-				cout << "2. Automatic\n   - Ships are placed automatically by the system\n   - Player attacks manually\n\n";
-				cout << "3. Bot\n   - Bot places ships automatically\n   - Bot attacks automatically\n\n";
+				cout << "Ship Rules:\n- Ships cannot touch each other\n- Ships can be placed horizontally or vertically\n";
+				cout << "- Rotation is blocked outside the map\n\n";
 
-				cout << "Ship Types:\n- 4 ships with 1 cell\n- 3 ships with 2 cells\n- 2 ships with 3 cells\n\n";
+				cout << "Battle Symbols:\nM = Miss\nH = Hit\nA = Destroyed ship\n\n";
 
-				cout << "Ship Placement Rules:\n- Ships cannot touch each other\n- Minimum 1 cell distance is required\n";
-				cout << "- Ships can be rotated\n  H -> Horizontal position\n  V -> Vertical position\n";
-				cout << "- Rotation is blocked if ship goes outside the map\n\n";
-
-				cout << "Battle System:\n- M = Missed shot\n- H = Ship hit but not destroyed\n";
-				cout << "- A = Ship completely destroyed\n\n";
-
-				cout << "Smart Bot AI:\nThe bot is not completely random.\nIf the bot hits a ship and the ship is not destroyed,\n";
-				cout << "it searches nearby cells intelligently until the ship sinks.\n\n";
-
-				cout << "Objective:\nDestroy all enemy ships before your opponent destroys yours.\n\n";
-
-				cout << "Controls:\nArrow Keys -> Movement\nEnter -> Select\nF -> Choose ship\nH -> Horizontal position\n";
-				cout << "V -> Vertical position\nESC -> Back/Menu\n";
+				cout << "Controls:\nArrow Keys -> Move\nEnter -> Select\nF -> Choose ship\nH/V -> Rotate ship\nESC -> Back/Menu\n";
 				break;
 			case 2:
 				system("cls || clear");

@@ -19,13 +19,13 @@ public:
 	{
 		switch (player)
 		{
-		case 1:
+		case 0:
 			_player = "Bot";
 			break;
-		case 2:
+		case 1:
 			_player = "Manual";
 			break;
-		case 3:
+		case 2:
 			_player = "Automatic";
 			break;
 		}
