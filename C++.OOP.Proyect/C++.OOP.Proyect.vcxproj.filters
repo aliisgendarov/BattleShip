@@ -26,5 +26,14 @@
     <ClInclude Include="helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ship.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="board.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

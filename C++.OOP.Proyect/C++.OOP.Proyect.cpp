@@ -4,21 +4,35 @@
 #define KeyLeft 75
 #define Enter 13
 #define ESC 27
+#define H 104
+#define V 118
+#define F 102
+#define Cell 178
+#define Border 177
 
 #include <iostream>
 #include <cassert>
 #include <conio.h>
 #include <thread>
 #include <chrono>
+#include <vector>
 
 using namespace std;
 
+
+typedef unsigned short int ushort;
+
 #include "player.h"
+#include "ship.h"
+#include "board.h"
+#include "bot.h"
 #include "helpers.h"
 
 
 int main()
 {
+	srand(time(NULL));
+
 	cout << "Welcome BattleShip Game";
 	this_thread::sleep_for(chrono::seconds(2));
 
@@ -75,6 +89,251 @@ int main()
 					case ESC:
 						isRunning = false;
 						break;
+					case Enter:
+						switch (cho)
+						{
+						case 0:
+							break;
+						case 1:
+							break;
+						case 2:
+						{
+							Board p1Board;
+							Board p2Board;
+
+							Board* board = &p1Board;
+
+							int currentPlayer = 1;
+
+							int cursorX = 0;
+							int cursorY = 0;
+
+							Ship currentShip(one, Horizontal, { 0,0 });
+
+							bool gameRunning = true;
+
+							if (currentPlayer == 1)
+							{
+								if (p1.getPlayer() != "Manual")
+								{
+									board->placeShipsAutomatically();
+									system("cls || clear");
+									cout << "Player " << currentPlayer << " board automatically filled!" << endl;
+									cout << "Press any key to countinue...";
+									_getch();
+								}
+							}
+							else
+							{
+								if (p2.getPlayer() != "Manual")
+								{
+									board->placeShipsAutomatically();
+									system("cls || clear");
+									cout << "Player " << currentPlayer << " board automatically filled!" << endl;
+									cout << "Press any key to countinue...";
+									_getch();
+								}
+							}
+
+							while (gameRunning)
+							{
+								if (!board->haveShipToPut())
+								{
+									if (currentPlayer == 1)
+									{
+										currentPlayer = 2;
+										board = &p2Board;
+										currentShip.setSize(one);
+
+										system("cls || clear");
+										cout << "Player 2 Turn!" << endl;
+
+										if (p2.getPlayer() != "Manual")
+										{
+											board->placeShipsAutomatically();
+											cout << "Player " << currentPlayer << " board automatically filled!" << endl;
+											cout << "Press any key to countinue...";
+											_getch();
+										}
+
+									}
+									else
+									{
+										gameRunning = false;
+									}
+
+									continue;
+								}
+
+								if (board->isShipCountFinished(currentShip) &&
+									board->haveShipToPut())
+								{
+									int cohi = 0;
+									bool selectRunning = true;
+
+									while (selectRunning)
+									{
+										system("cls || clear");
+
+										cout << "Player " << currentPlayer << endl;
+
+										board->draw(cursorX, cursorY, &currentShip);
+
+										cout << "Press \'f\' to select ship";
+										cout << "\033[0m" << endl;
+										cout << (cohi == 0 ? "->>" : "") << "1)Count of one cell ships - "
+											<< board->getOneCellCount() << (cohi == 0 ? " <<-" : "") << endl;
+										cout << (cohi == 1 ? "->>" : "") << "2)Count of two cell ships - "
+											<< board->getTwoCellCount() << (cohi == 1 ? " <<-" : "") << endl;
+										cout << (cohi == 2 ? "->>" : "") << "3)Count of three cell ships - "
+											<< board->getThreeCellCount() << (cohi == 2 ? " <<-" : "") << endl;
+
+										int k = _getch();
+
+										keyUpAndDownMove(k, cohi, 2);
+
+										switch (k)
+										{
+										case Enter:
+
+											switch (cohi)
+											{
+											case 0:
+
+												if (board->getOneCellCount() == 0)
+													break;
+
+												currentShip.setSize(one);
+												selectRunning = false;
+												break;
+											case 1:
+
+												if (board->getTwoCellCount() == 0)
+													break;
+
+												currentShip.setSize(two);
+												selectRunning = false;
+												break;
+											case 2:
+
+												if (board->getThreeCellCount() == 0)
+													break;
+
+												currentShip.setSize(three);
+												selectRunning = false;
+												break;
+											}
+										}
+									}
+								}
+
+								system("cls || clear");
+
+								currentShip.setPosition({ cursorX, cursorY });
+
+								cout << "Player " << currentPlayer << endl;
+								board->draw(cursorX, cursorY, &currentShip);
+								cout << "Press \'f\' to select ship" << endl;
+								cout << "1)Count of one cell ships - " << board->getOneCellCount() << endl;
+								cout << "2)Count of two cell ships - " << board->getTwoCellCount() << endl;
+								cout << "3)Count of three cell ships - " << board->getThreeCellCount() << endl;
+
+								int key = _getch();
+								switch (key)
+								{
+								case KeyUp:
+									cursorY > 0 ? cursorY-- : cursorY = 0;
+									break;
+								case KeyDown:
+									if (cursorY < 9 && board->moveChek(currentShip, 0, 1))
+										cursorY++;
+									break;
+								case KeyLeft:
+									if (cursorX > 0)
+										cursorX--;
+									break;
+								case KeyRight:
+									if (cursorX < 9 && board->moveChek(currentShip, 1, 0))
+										cursorX++;
+									break;
+								case H:
+									if (currentShip.getDirection() == Vertical)
+										board->rotateCheckAndDone(currentShip);
+									break;
+
+								case V:
+									if (currentShip.getDirection() == Horizontal)
+										board->rotateCheckAndDone(currentShip);
+									break;
+
+								case F:
+								{
+									int cohi = 0;
+									bool selectRunning = true;
+
+									while (selectRunning)
+									{
+										system("cls || clear");
+										cout << "Player " << currentPlayer << endl;
+										board->draw(cursorX, cursorY, &currentShip);
+										cout << "Press \'f\' to select ship";
+										cout << "\033[0m" << (cho == 0 ? " <<-" : "") << endl;
+										cout << (cohi == 0 ? "->>" : "") << "1)Count of one cell ships - " << board->getOneCellCount()
+											<< (cohi == 0 ? " <<-" : "") << endl;
+										cout << (cohi == 1 ? "->>" : "") << "2)Count of two cell ships - " << board->getTwoCellCount()
+											<< (cohi == 1 ? " <<-" : "") << endl;
+										cout << (cohi == 2 ? "->>" : "") << "3)Count of three cell ships - " << board->getThreeCellCount()
+											<< (cohi == 2 ? " <<-" : "") << endl;
+										int k = _getch();
+										keyUpAndDownMove(k, cohi, 2);
+										switch (k)
+										{
+										case Enter:
+											switch (cohi)
+											{
+											case 0:
+												if (board->getOneCellCount() == 0)
+													break;
+												currentShip.setSize(one);
+												selectRunning = false;
+												break;
+											case 1:
+												if (board->getTwoCellCount() == 0)
+													break;
+												currentShip.setSize(two);
+												selectRunning = false;
+												break;
+											case 2:
+												if (board->getThreeCellCount() == 0)
+													break;
+												currentShip.setSize(three);
+												selectRunning = false;
+												break;
+											}
+										}
+									}
+
+									break;
+								}
+								case Enter:
+								{
+									board->placeShip(currentShip);
+									break;
+								}
+
+								case ESC:
+								{
+									gameRunning = false;
+									break;
+								}
+								}
+							}
+							break;
+						}
+						case 3:
+							isRunning = false;
+							break;
+						}
 					}
 				}
 				break;
@@ -105,8 +364,8 @@ int main()
 				break;
 			}
 			cout << "\nPress any key to countinue...";
-			int a = _getch();
+			_getch();
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
