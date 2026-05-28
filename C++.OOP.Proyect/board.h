@@ -9,15 +9,23 @@ enum CellState
 	Destroyed
 };
 
+enum AttackResult
+{
+	AlreadyAttacked,
+	Missed,
+	Hitted,
+	DestroyedShip
+};
+
 class Board
 {
 private:
 	static const int WIDTH = 10;
 	static const int HEIGHT = 10;
 
-	ushort _oneCellCount = 3;
-	ushort _twoCellCount = 2;
-	ushort _threeCellCount = 1;
+	ushort _oneCellCount = 4;
+	ushort _twoCellCount = 3;
+	ushort _threeCellCount = 2;
 
 	CellState _board[HEIGHT][WIDTH]{};
 	vector<Ship> _ships;
@@ -96,6 +104,11 @@ public:
 		ship.changeDirection();
 
 		return false;
+	}
+
+	CellState getCellState(int x, int y) const
+	{
+		return _board[y][x];
 	}
 
 	bool canPlaceShip(const Ship& ship) const
@@ -409,13 +422,14 @@ public:
 		return nullptr;
 	}
 
-	bool attack(int x, int y)
+
+	AttackResult attack(int x, int y)
 	{
 		if (!isInside(x, y))
-			return false;
+			return AlreadyAttacked;
 
 		if (_board[y][x] == Hit || _board[y][x] == Miss || _board[y][x] == Destroyed)
-			return false;
+			return AlreadyAttacked;
 
 		if (_board[y][x] == ShipCell)
 		{
@@ -430,22 +444,21 @@ public:
 					vector<Position> cells = ship->getCells();
 
 					for (const auto& cell : cells)
-					{
 						_board[cell.y][cell.x] = Destroyed;
-					}
+
+					return DestroyedShip;
 				}
 				else
 				{
 					_board[y][x] = Hit;
+					return Hitted;
 				}
 			}
-
-			return true;
 		}
 
 		_board[y][x] = Miss;
 
-		return false;
+		return Missed;
 	}
 
 	void clearBoard()

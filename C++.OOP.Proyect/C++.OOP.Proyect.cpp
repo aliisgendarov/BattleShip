@@ -335,17 +335,48 @@ int main()
 
 							int currentTurn = 1;
 
+							BotClass bot1;
+							BotClass bot2;
+
 							bool battleRunning = true;
 
 							while (battleRunning)
 							{
+								bool isBotTurn = false;
+
+								if (currentTurn == 1)
+									isBotTurn = p1.getPlayer() == "Bot";
+								else
+									isBotTurn = p2.getPlayer() == "Bot";
+
 								system("cls || clear");
 
 								cout << "PLAYER " << currentTurn << " TURN\n\n";
 
 								drawBoards(p1Board, p2Board, currentTurn, attackX, attackY);
 
-								int key = _getch();
+								int key = 0;
+
+								if (!isBotTurn)
+								{
+									key = _getch();
+								}
+								else
+								{
+									Position move;
+
+									if (currentTurn == 1)
+										move = bot1.makeMove(p2Board);
+									else
+										move = bot2.makeMove(p1Board);
+
+									attackX = move.x;
+									attackY = move.y;
+
+									key = Enter;
+
+									this_thread::sleep_for(chrono::milliseconds(500));
+								}
 
 								switch (key)
 								{
@@ -379,12 +410,12 @@ int main()
 
 								case Enter:
 								{
-									bool hit;
+									AttackResult result;
 
 									if (currentTurn == 1)
-										hit = p2Board.attack(attackX, attackY);
+										result = p2Board.attack(attackX, attackY);
 									else
-										hit = p1Board.attack(attackX, attackY);
+										result = p1Board.attack(attackX, attackY);
 
 									system("cls || clear");
 
@@ -419,7 +450,18 @@ int main()
 										break;
 									}
 
-									currentTurn = currentTurn == 1 ? 2 : 1;
+									if (isBotTurn)
+									{
+										Position pos = { attackX, attackY };
+
+										if (currentTurn == 1)
+											bot1.processResult(p2Board, pos, result);
+										else
+											bot2.processResult(p1Board, pos, result);
+									}
+
+									if (result != AlreadyAttacked)
+										currentTurn = currentTurn == 1 ? 2 : 1;
 
 									attackX = 0;
 									attackY = 0;
