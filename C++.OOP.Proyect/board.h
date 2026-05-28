@@ -144,7 +144,150 @@ public:
 		return true;
 	}
 
-	void draw(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr) const
+	vector<string> getBoardLines(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, 
+		bool hideShips = false) const
+	{
+		vector<string> lines;
+
+		string top;
+
+		top += (char)201;
+
+		for (int i = 0; i < WIDTH * 2; i++)
+			top += (char)205;
+
+		top += (char)187;
+
+		lines.push_back(top);
+
+		vector<Position> previewCells;
+
+		if (previewShip != nullptr) 
+			previewCells = previewShip->getCells();
+
+		for (int y = 0; y < HEIGHT; y++)
+		{
+			string line;
+
+			line += (char)186;
+
+			for (int x = 0; x < WIDTH; x++)
+			{
+				bool isPreview = false;
+
+				for (const auto& p : previewCells)
+				{
+					if (p.x == x && p.y == y)
+					{
+						isPreview = true;
+						break;
+					}
+				}
+
+				if (isPreview)
+				{
+					line += "\033[32mOO\033[0m";
+					continue;
+				}
+
+				bool isCursor = (x == cursorX && y == cursorY);
+
+				if (isCursor)
+				{
+					line += "\033[43m";
+
+					switch (_board[y][x])
+					{
+					case Empty:
+						line += "  ";
+						break;
+
+					case ShipCell:
+
+						if (hideShips)
+							line += "  ";
+						else
+							line += "OO";
+
+						break;
+
+					case Hit:
+						line += "H ";
+						break;
+
+					case Miss:
+						line += "M ";
+						break;
+
+					case Destroyed:
+						line += "A ";
+						break;
+					}
+
+					line += "\033[0m";
+
+					continue;
+				}
+
+				switch (_board[y][x])
+				{
+				case Empty:
+					line += "\033[90m";
+					line += (char)Cell;
+					line += (char)Cell;
+					line += "\033[0m";
+					break;
+
+				case ShipCell:
+
+					if (hideShips)
+					{
+						line += "\033[90m";
+						line += (char)Cell;
+						line += (char)Cell;
+						line += "\033[0m";
+					}
+					else
+					{
+						line += "\033[97mOO\033[0m";
+					}
+
+					break;
+
+				case Hit:
+					line += "\033[34mH \033[0m";
+					break;
+
+				case Miss:
+					line += "\033[31mM \033[0m";
+					break;
+
+				case Destroyed:
+					line += "\033[32mA \033[0m";
+					break;
+				}
+			}
+
+			line += (char)186;
+
+			lines.push_back(line);
+		}
+
+		string bottom;
+
+		bottom += (char)200;
+
+		for (int i = 0; i < WIDTH * 2; i++)
+			bottom += (char)205;
+
+		bottom += (char)188;
+
+		lines.push_back(bottom);
+
+		return lines;
+	}
+
+	void draw(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, bool hideShips = false) const
 	{
 		cout << (char)201;
 
@@ -193,7 +336,11 @@ public:
 					break;
 
 				case ShipCell:
-					cout << "\033[97m" << "OO";
+					if (hideShips)
+						cout << "\033[90m" << (char)Cell << (char)Cell;
+					else
+						cout << "\033[97mOO";
+
 					break;
 
 				case Hit:
@@ -267,6 +414,9 @@ public:
 		if (!isInside(x, y))
 			return false;
 
+		if (_board[y][x] == Hit || _board[y][x] == Miss || _board[y][x] == Destroyed)
+			return false;
+
 		if (_board[y][x] == ShipCell)
 		{
 			Ship* ship = findShipAtPosition(x, y);
@@ -292,6 +442,8 @@ public:
 
 			return true;
 		}
+
+		_board[y][x] = Miss;
 
 		return false;
 	}

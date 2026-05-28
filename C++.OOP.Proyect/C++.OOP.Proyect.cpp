@@ -16,6 +16,7 @@
 #include <thread>
 #include <chrono>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -328,6 +329,105 @@ int main()
 								}
 								}
 							}
+
+							int attackX = 0;
+							int attackY = 0;
+
+							int currentTurn = 1;
+
+							bool battleRunning = true;
+
+							while (battleRunning)
+							{
+								system("cls || clear");
+
+								cout << "PLAYER " << currentTurn << " TURN\n\n";
+
+								drawBoards(p1Board, p2Board, currentTurn, attackX, attackY);
+
+								int key = _getch();
+
+								switch (key)
+								{
+								case KeyUp:
+
+									if (attackY > 0)
+										attackY--;
+
+									break;
+
+								case KeyDown:
+
+									if (attackY < 9)
+										attackY++;
+
+									break;
+
+								case KeyLeft:
+
+									if (attackX > 0)
+										attackX--;
+
+									break;
+
+								case KeyRight:
+
+									if (attackX < 9)
+										attackX++;
+
+									break;
+
+								case Enter:
+								{
+									bool hit;
+
+									if (currentTurn == 1)
+										hit = p2Board.attack(attackX, attackY);
+									else
+										hit = p1Board.attack(attackX, attackY);
+
+									system("cls || clear");
+
+									drawBoards(p1Board, p2Board, currentTurn, attackX, attackY);
+
+
+									bool gameOver = false;
+
+									if (currentTurn == 1)
+									{
+										if (p2Board.aliveShipsCount() == 0)
+											gameOver = true;
+									}
+									else
+									{
+										if (p1Board.aliveShipsCount() == 0)
+											gameOver = true;
+									}
+
+									if (gameOver)
+									{
+										system("cls || clear");
+
+										drawBoards(p1Board, p2Board, currentTurn);
+
+										cout << "\nPLAYER " << currentTurn << " WINS!\n";
+
+										battleRunning = false;
+
+										_getch();
+
+										break;
+									}
+
+									currentTurn = currentTurn == 1 ? 2 : 1;
+
+									attackX = 0;
+									attackY = 0;
+
+									break;
+								}
+								}
+							}
 							break;
 						}
 						case 3:
@@ -336,6 +436,8 @@ int main()
 						}
 					}
 				}
+
+
 				break;
 			}
 			case 1:
