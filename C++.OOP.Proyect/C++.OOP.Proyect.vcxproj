@@ -133,8 +133,13 @@
     <ClInclude Include="board.h" />
     <ClInclude Include="bot.h" />
     <ClInclude Include="helpers.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="player.h" />
     <ClInclude Include="ship.h" />
+    <ClInclude Include="statistics.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gameStatistics.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

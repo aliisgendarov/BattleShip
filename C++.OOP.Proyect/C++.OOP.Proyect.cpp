@@ -5,8 +5,8 @@
 #define Enter 13
 #define ESC 27
 #define H 104
-#define V 118
-#define F 102
+#define VV 118
+#define FF 102
 #define Cell 178
 #define Border 177
 
@@ -19,9 +19,14 @@
 #include <string>
 #include <exception>
 #include <stdexcept>
+#include <fstream>
+#include <iomanip>
+
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 using namespace std;
-
 
 typedef unsigned short int ushort;
 
@@ -30,10 +35,12 @@ typedef unsigned short int ushort;
 #include "board.h"
 #include "bot.h"
 #include "helpers.h"
-
+#include "statistics.h"
 
 int main()
 {
+	Statistics stats = loadStatistics();
+
 	try
 	{
 		srand(time(NULL));
@@ -197,12 +204,12 @@ int main()
 											board->rotateCheckAndDone(currentShip);
 										break;
 
-									case V:
+									case VV:
 										if (currentShip.getDirection() == Horizontal)
 											board->rotateCheckAndDone(currentShip);
 										break;
 
-									case F:
+									case FF:
 									{
 										selectShipMenu(*board, currentShip, cursorX, cursorY, currentPlayer);
 										break;
@@ -336,6 +343,21 @@ int main()
 
 											battleRunning = false;
 
+											stats.gamesPlayed++;
+
+											if (currentTurn == 1)
+											{
+												stats.player1Wins++;
+												if (p1.getPlayer() == "Bot") stats.botWins++;
+											}
+											else
+											{
+												stats.player2Wins++;
+												if (p2.getPlayer() == "Bot") stats.botWins++;
+											}
+
+											saveStatistics(stats);
+
 											_getch();
 
 											break;
@@ -388,7 +410,13 @@ int main()
 
 					cout << "Battle Symbols:\nM = Miss\nH = Hit\nA = Destroyed ship\n\n";
 
-					cout << "Controls:\nArrow Keys -> Move\nEnter -> Select\nF -> Choose ship\nH/V -> Rotate ship\nESC -> Back/Menu\n";
+					cout << "Controls:\nArrow Keys -> Move\nEnter -> Select\nF -> Choose ship\nH/V -> Rotate ship\nESC -> Back/Menu\n\n\n";
+					
+					cout << "Games Played: " << stats.gamesPlayed << endl;
+					cout << "Player 1 Wins: " << stats.player1Wins << endl;
+					cout << "Player 2 Wins: " << stats.player2Wins << endl;
+					cout << "Bot Wins: " << stats.botWins << endl;
+
 					break;
 				case 2:
 					system("cls || clear");
