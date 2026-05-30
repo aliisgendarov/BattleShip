@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 
 #include "json.hpp"
 
@@ -33,6 +34,7 @@ typedef unsigned short int ushort;
 #include "player.h"
 #include "ship.h"
 #include "board.h"
+#include "attacker.h"
 #include "bot.h"
 #include "helpers.h"
 #include "statistics.h"

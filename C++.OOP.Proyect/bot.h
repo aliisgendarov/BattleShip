@@ -1,6 +1,6 @@
 #pragma once
 
-class BotClass
+class BotClass : public Attacker
 {
 private:
 	vector<Position> _targets;
@@ -87,7 +87,7 @@ public:
 		}
 	}
 
-	Position makeMove(Board& enemyBoard)
+	virtual Position makeMove(Board& enemyBoard) override
 	{
 		Position move = getTargetMove(enemyBoard);
 
@@ -191,7 +191,7 @@ public:
 
 		_hits.clear();
 	}
-	void processResult(Board& board, Position pos, AttackResult result)
+	virtual void processResult(Board& board, Position pos, AttackResult result) override
 	{
 		if (result == Hitted)
 			handleHit(board, pos);

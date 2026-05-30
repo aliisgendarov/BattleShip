@@ -130,6 +130,7 @@
     <ClCompile Include="C++.OOP.Proyect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="attacker.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="bot.h" />
     <ClInclude Include="helpers.h" />
