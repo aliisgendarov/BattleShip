@@ -31,10 +31,7 @@ private:
 	vector<Ship> _ships;
 
 public:
-	Board()
-	{
-		clearBoard();
-	}
+	Board() { clearBoard(); }
 
 	int getWidth() const { return WIDTH; }
 	int getHeight() const { return HEIGHT; }
@@ -47,15 +44,11 @@ public:
 		return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT;
 	}
 
-	bool moveChek(Ship& ship, int xx = 0, int yy = 0)
+	bool moveCheck(const Ship& ship, int xx = 0, int yy = 0) const
 	{
-		vector<Position> cells = ship.getCells();
-
-		for (const auto& cell : cells)
-		{
+		for (const auto& cell : ship.getCells())
 			if (!isInside(cell.x + xx, cell.y + yy))
 				return false;
-		}
 
 		return true;
 	}
@@ -81,37 +74,32 @@ public:
 
 	bool intoBoard(Ship& ship)
 	{
-		vector<Position> cells = ship.getCells();
-
-		for (const auto& cell : cells)
-		{
+		for (const auto& cell : ship.getCells())
 			if (!isInside(cell.x, cell.y))
 				return false;
-		}
 
 		return true;
 	}
 
-	bool rotateCheckAndDone(Ship& ship)
+	void rotateCheckAndDone(Ship& ship)
 	{
-		ship.changeDirection();
+		ship.rotate();
 
-		bool check = intoBoard(ship);
+		if (intoBoard(ship))
+			return;
 
-		if (check)
-			return true;
-
-		ship.changeDirection();
-
-		return false;
+		ship.rotate();
 	}
 
 	CellState getCellState(int x, int y) const
 	{
+		if (!isInside(x, y))
+			throw out_of_range("Invalid board coordinates!");
+
 		return _board[y][x];
 	}
 
-	bool canPlaceShip(const Ship& ship) const
+	bool canPlaceShip(const Ship& ship) const // Ship qoyula biler yoxsa yox
 	{
 		vector<Position> cells = ship.getCells();
 
@@ -120,7 +108,7 @@ public:
 			if (!isInside(cell.x, cell.y))
 				return false;
 
-			for (int yy = cell.y - 1; yy <= cell.y + 1; yy++)
+			for (int yy = cell.y - 1; yy <= cell.y + 1; yy++) // ship e 1 cell yaxinliqda gemi qoymaq olmaz onun ucun yoxlma
 			{
 				for (int xx = cell.x - 1; xx <= cell.x + 1; xx++)
 				{
@@ -136,7 +124,7 @@ public:
 		return true;
 	}
 
-	bool placeShip(const Ship& ship)
+	bool placeShip(const Ship& ship) // shipi elave etme
 	{
 		if (!canPlaceShip(ship) || 
 			(ship.getSize() == 1 && _oneCellCount == 0) || (ship.getSize() == 2 && _twoCellCount == 0) ||
@@ -157,11 +145,8 @@ public:
 		return true;
 	}
 
-	vector<string> getBoardLines(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, 
-		bool hideShips = false) const
+	string createTopBorder() const
 	{
-		vector<string> lines;
-
 		string top;
 
 		top += (char)201;
@@ -171,121 +156,11 @@ public:
 
 		top += (char)187;
 
-		lines.push_back(top);
+		return top;
+	}
 
-		vector<Position> previewCells;
-
-		if (previewShip != nullptr) 
-			previewCells = previewShip->getCells();
-
-		for (int y = 0; y < HEIGHT; y++)
-		{
-			string line;
-
-			line += (char)186;
-
-			for (int x = 0; x < WIDTH; x++)
-			{
-				bool isPreview = false;
-
-				for (const auto& p : previewCells)
-				{
-					if (p.x == x && p.y == y)
-					{
-						isPreview = true;
-						break;
-					}
-				}
-
-				if (isPreview)
-				{
-					line += "\033[32mOO\033[0m";
-					continue;
-				}
-
-				bool isCursor = (x == cursorX && y == cursorY);
-
-				if (isCursor)
-				{
-					line += "\033[43m";
-
-					switch (_board[y][x])
-					{
-					case Empty:
-						line += "  ";
-						break;
-
-					case ShipCell:
-
-						if (hideShips)
-							line += "  ";
-						else
-							line += "OO";
-
-						break;
-
-					case Hit:
-						line += "H ";
-						break;
-
-					case Miss:
-						line += "M ";
-						break;
-
-					case Destroyed:
-						line += "A ";
-						break;
-					}
-
-					line += "\033[0m";
-
-					continue;
-				}
-
-				switch (_board[y][x])
-				{
-				case Empty:
-					line += "\033[90m";
-					line += (char)Cell;
-					line += (char)Cell;
-					line += "\033[0m";
-					break;
-
-				case ShipCell:
-
-					if (hideShips)
-					{
-						line += "\033[90m";
-						line += (char)Cell;
-						line += (char)Cell;
-						line += "\033[0m";
-					}
-					else
-					{
-						line += "\033[97mOO\033[0m";
-					}
-
-					break;
-
-				case Hit:
-					line += "\033[34mH \033[0m";
-					break;
-
-				case Miss:
-					line += "\033[31mM \033[0m";
-					break;
-
-				case Destroyed:
-					line += "\033[32mA \033[0m";
-					break;
-				}
-			}
-
-			line += (char)186;
-
-			lines.push_back(line);
-		}
-
+	string createBottomBorder() const
+	{
 		string bottom;
 
 		bottom += (char)200;
@@ -295,20 +170,129 @@ public:
 
 		bottom += (char)188;
 
-		lines.push_back(bottom);
-
-		return lines;
+		return bottom;
 	}
 
-	void draw(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, bool hideShips = false) const
+	bool isPreviewCell(int x, int y, const vector<Position>& previewCells) const
 	{
-		cout << (char)201;
+		for (const auto& p : previewCells)
+			if (p.x == x && p.y == y)
+				return true;
 
+		return false;
+	}
 
-		for (int i = 0; i < WIDTH * 2; i++)
-			cout << (char)205;
+	bool isCursorPosition(int x, int y, int cursorX, int cursorY) const
+	{
+		return x == cursorX && y == cursorY;
+	}
 
-		cout << (char)187 << endl;
+	string renderNormalCell(CellState state, bool hideShips) const
+	{
+		string cell;
+
+		switch (state)
+		{
+		case Empty:
+			cell += "\033[90m";
+			cell += (char)Cell;
+			cell += (char)Cell;
+			cell += "\033[0m";
+
+			break;
+		case ShipCell:
+			if (hideShips)
+			{
+				cell += "\033[90m";
+				cell += (char)Cell;
+				cell += (char)Cell;
+				cell += "\033[0m";
+			}
+			else
+				cell += "\033[97mOO\033[0m";
+
+			break;
+		case Hit:
+			cell += "\033[34mH \033[0m";
+
+			break;
+		case Miss:
+			cell += "\033[31mM \033[0m";
+
+			break;
+		case Destroyed:
+			cell += "\033[32mA \033[0m";
+
+			break;
+		}
+
+		return cell;
+	}
+
+	string renderCursorCell(CellState state, bool hideShips) const
+	{
+		string cell = "\033[43m";
+
+		switch (state)
+		{
+		case Empty:
+			cell += "  ";
+			break;
+		case ShipCell:
+			if (hideShips)
+				cell += "  ";
+			else
+				cell += "OO";
+
+			break;
+		case Hit:
+			cell += "H ";
+			break;
+		case Miss:
+			cell += "M ";
+			break;
+		case Destroyed:
+			cell += "A ";
+			break;
+		}
+		cell += "\033[0m";
+
+		return cell;
+	}
+
+	string renderCell(int x, int y, int cursorX, int cursorY, const vector<Position>& previewCells, bool hideShips) const
+	{
+		if (isPreviewCell(x, y, previewCells))
+			return "\033[32mOO\033[0m";
+
+		bool isCursor = isCursorPosition(x, y, cursorX, cursorY);
+
+		if (isCursor)
+			return renderCursorCell(_board[y][x], hideShips);
+
+		return renderNormalCell(_board[y][x], hideShips);
+	}
+
+	string buildLine(int y, int cursorX, int cursorY, const vector<Position>& previewCells, bool hideShips) const
+	{
+		string line;
+
+		line += (char)186;
+
+		for (int x = 0; x < WIDTH; x++)
+			line += renderCell(x, y, cursorX, cursorY, previewCells, hideShips);
+
+		line += (char)186;
+
+		return line;
+	}
+
+	vector<string> getBoardLines(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, 
+		bool hideShips = false) const
+	{
+		vector<string> lines;
+
+		lines.push_back(createTopBorder());
 
 		vector<Position> previewCells;
 
@@ -316,71 +300,19 @@ public:
 			previewCells = previewShip->getCells();
 
 		for (int y = 0; y < HEIGHT; y++)
-		{
-			cout << (char)186;
+			lines.push_back(buildLine(y, cursorX, cursorY, previewCells, hideShips));
 
-			for (int x = 0; x < WIDTH; x++)
-			{
-				bool isPreview = false;
+		lines.push_back(createBottomBorder());
 
-				for (const auto& p : previewCells)
-				{
-					if (p.x == x && p.y == y)
-					{
-						isPreview = true;
-						break;
-					}
-				}
+		return lines;
+	}
 
+	void draw(int cursorX = -1, int cursorY = -1, const Ship* previewShip = nullptr, bool hideShips = false) const
+	{
+		vector<string> lines = getBoardLines(cursorX, cursorY, previewShip, hideShips);
 
-				if (isPreview)
-				{
-					previewShip->getSize() == 1 ? cout << "\033[32mOO" : previewShip->getSize() == 2 ? cout << "\033[32m00"
-						: cout << "\033[32mOO";
-					
-					cout << "\033[0m";
-					continue;
-				}
-
-				switch (_board[y][x])
-				{
-				case Empty:
-					cout << "\033[90m" << (char)Cell << (char)Cell;
-					break;
-
-				case ShipCell:
-					if (hideShips)
-						cout << "\033[90m" << (char)Cell << (char)Cell;
-					else
-						cout << "\033[97mOO";
-
-					break;
-
-				case Hit:
-					cout << "\033[31m" << "H";
-					break;
-
-				case Miss:
-					cout << "\033[34m" << "M";
-					break;
-
-				case Destroyed:
-					cout << "\033[32m" << "A";
-					break;
-				}
-
-				cout << "\033[0m";
-			}
-
-			cout << (char)186 << endl;
-		}
-
-		cout << (char)200;
-
-		for (int i = 0; i < WIDTH * 2; i++)
-			cout << (char)205;
-
-		cout << (char)188 << endl;
+		for (const auto& line : lines)
+			cout << line << endl;
 	}
 
 	void autoPlaceShip(ShipSize size)
@@ -419,16 +351,41 @@ public:
 			}
 		}
 
-		return nullptr;
+		throw runtime_error("Ship not found!");
 	}
 
+	bool isAlreadyAttackedCell(int x, int y) const
+	{
+		return _board[y][x] == Hit || _board[y][x] == Miss || _board[y][x] == Destroyed;
+	}
+
+	void destroyShipCells(const Ship& ship)
+	{
+		for (const auto& cell : ship.getCells())
+			_board[cell.y][cell.x] = Destroyed;
+	}
+
+	AttackResult handleShipHit(Ship& ship, int x, int y)
+	{
+		ship.hit();
+
+		if (ship.isDestroyed())
+		{
+			destroyShipCells(ship);
+			return DestroyedShip;
+		}
+
+		_board[y][x] = Hit;
+
+		return Hitted;
+	}
 
 	AttackResult attack(int x, int y)
 	{
 		if (!isInside(x, y))
-			return AlreadyAttacked;
+			throw out_of_range("Attack coordinates are outside the board!");
 
-		if (_board[y][x] == Hit || _board[y][x] == Miss || _board[y][x] == Destroyed)
+		if (isAlreadyAttackedCell(x, y))
 			return AlreadyAttacked;
 
 		if (_board[y][x] == ShipCell)
@@ -436,24 +393,7 @@ public:
 			Ship* ship = findShipAtPosition(x, y);
 
 			if (ship != nullptr)
-			{
-				ship->hit();
-
-				if (ship->isDestroyed())
-				{
-					vector<Position> cells = ship->getCells();
-
-					for (const auto& cell : cells)
-						_board[cell.y][cell.x] = Destroyed;
-
-					return DestroyedShip;
-				}
-				else
-				{
-					_board[y][x] = Hit;
-					return Hitted;
-				}
-			}
+				return handleShipHit(*ship, x, y);
 		}
 
 		_board[y][x] = Miss;
@@ -466,12 +406,8 @@ public:
 		_ships.clear();
 
 		for (int y = 0; y < HEIGHT; y++)
-		{
 			for (int x = 0; x < WIDTH; x++)
-			{
 				_board[y][x] = Empty;
-			}
-		}
 	}
 
 	int aliveShipsCount() const
@@ -479,10 +415,8 @@ public:
 		int count = 0;
 
 		for (const auto& ship : _ships)
-		{
 			if (!ship.isDestroyed())
 				count++;
-		}
 
 		return count;
 	}

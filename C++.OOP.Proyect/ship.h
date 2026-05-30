@@ -32,8 +32,7 @@ public:
 	Ship() = delete;
 
 	Ship(ShipSize size, Direction direction, Position startPosition)
-		: _size(size), _health(size), _direction(direction), _startPosition(startPosition), _destroyed(false) {
-	}
+		: _size(size), _health(size), _direction(direction), _startPosition(startPosition), _destroyed(false) {}
 
 	int getSize() const { return _size; }
 	int getHealth() const { return _health; }
@@ -49,22 +48,10 @@ public:
 		this->_health = size;
 	}
 
-	void changeDirection()
-	{
-		if (this->_direction == Horizontal) this->_direction = Vertical;
-		else this->_direction = Horizontal;
-	}
-
-
-
 	void rotate()
 	{
-		if (_direction == Direction::Horizontal)
-		{
-			_direction = Direction::Vertical;
-			return;
-		}
-		_direction = Direction::Horizontal;
+		if (_direction == Direction::Horizontal) _direction = Direction::Vertical;
+		else _direction = Direction::Horizontal;
 	}
 
 	void hit()
@@ -86,13 +73,11 @@ public:
 
 			if (_direction == Direction::Horizontal)
 				pos.x += i;
-
 			else
 				pos.y += i;
 
 			cells.push_back(pos);
 		}
-
 
 		return cells;
 	}
